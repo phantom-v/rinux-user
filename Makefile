@@ -23,15 +23,20 @@ export DST_DIR CC LD AR OBJCOPY CFLAG
 
 .PHONY: all user clean
 
-all: user
+all: image
 
 $(TARGET_BUILT_IN):
 	$(MAKE) -C $(dir $@)
 
-user: $(TARGET_BUILT_IN)
-	$(LD) -T env/link.ld -o hello -melf64lriscv --build-id -X --whole-archive $(TARGET_BUILT_IN)
-	$(OBJCOPY) hello -O binary hello.bin
+testelf: $(TARGET_BUILT_IN)
+	$(LD) -T env/link.ld -o $@ -melf64lriscv --build-id -X --whole-archive --strip-debug $(TARGET_BUILT_IN)
+	$(OBJCOPY) $@ -O binary $@.bin
 
+image: testelf
+	mkdir -p $(DST_DIR)
+	cp $< $(DST_DIR)/hello
+	echo "flag={HappyNewYear}" > $(DST_DIR)/flag
+	cd $(DST_DIR); find . | cpio -o -H newc > ../simple_fs.cpio
 
 clean:
-	rm -rf ./**/*.o ./**/built-in.a hello*
+	rm -rf **/*.o **/built-in.a testelf* simple_fs.cpio build

@@ -6,5 +6,6 @@
 built-in.a
 log
 simple_fs.cpio
-hello*
+testelf*
+build
 
