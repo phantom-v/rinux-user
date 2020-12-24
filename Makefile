@@ -1,5 +1,6 @@
 SRC_DIR			=	$(CURDIR)
 DST_DIR			=	$(SRC_DIR)/build
+SYSROOT			=	$(DST_DIR)/sysroot
 
 CROSS_PREFIX	=	riscv64-unknown-elf-
 CC				=	$(CROSS_PREFIX)gcc
@@ -15,9 +16,10 @@ CFLAG		=	-march=$(ISA) -mabi=$(ABI) -mcmodel=medany \
 				-nostdlib -nostdinc -fno-builtin \
 				-g3 -static -lgcc $(INCLUDE)
 
-TARGET			= 	env lib
-TARGET_BUILT_IN	=	$(addsuffix /built-in.a,$(TARGET))
+BUILD_LIST	= 	env lib
+BUILT_IN	=	$(addsuffix /built-in.a,$(BUILD_LIST))
 
+TARGET		= 	simple_fs.cpio
 
 export DST_DIR CC LD AR OBJCOPY CFLAG
 
@@ -25,18 +27,18 @@ export DST_DIR CC LD AR OBJCOPY CFLAG
 
 all: image
 
-$(TARGET_BUILT_IN):
+$(BUILT_IN):
 	$(MAKE) -C $(dir $@)
 
-testelf: $(TARGET_BUILT_IN)
-	$(LD) -T env/link.ld -o $@ -melf64lriscv --build-id -X --whole-archive --strip-debug $(TARGET_BUILT_IN)
+testelf: $(BUILT_IN)
+	$(LD) -T env/link.ld -o $@ -melf64lriscv --build-id -X --whole-archive --strip-debug $(BUILT_IN)
 	$(OBJCOPY) $@ -O binary $@.bin
 
 image: testelf
-	mkdir -p $(DST_DIR)
-	cp $< $(DST_DIR)/hello
-	echo "flag={HappyNewYear}" > $(DST_DIR)/flag
-	cd $(DST_DIR); find . | cpio -o -H newc > ../simple_fs.cpio
+	mkdir -p $(SYSROOT)
+	cp $< $(SYSROOT)/hello
+	echo "flag={HappyNewYear2021}" > $(SYSROOT)/flag
+	cd $(SYSROOT); find . | cpio -o -H newc > $(DST_DIR)/$(TARGET)
 
 clean:
-	rm -rf **/*.o **/built-in.a testelf* simple_fs.cpio build
+	rm -rf **/*.o **/built-in.a testelf* $(TARGET) build
