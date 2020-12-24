@@ -9,12 +9,9 @@ SECTIONS
     }
     .text : { 
         *(.text) 
+        *(.note.gnu.build-id)
     }
     .data : { 
         *(.data) 
-    }
-    . = ALIGN(0x1000);
-    .debug : {
-        *(.note.gnu.build-id)
     }
 }
