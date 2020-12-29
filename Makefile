@@ -42,6 +42,7 @@ image: $(USER)
 	mkdir -p $(SYSROOT)
 	cp $< $(SYSROOT)/hello
 	echo "flag={HappyNewYear2021}" > $(SYSROOT)/flag
+	cp $(USER) $(SYSROOT)/
 	cd $(SYSROOT); find . | cpio -o -H newc > $(TARGET)
 
 clean:
