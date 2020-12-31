@@ -19,7 +19,10 @@ CFLAG		=	-march=$(ISA) -mabi=$(ABI) -mcmodel=medany \
 BUILD_LIST	= 	env lib
 BUILT_IN	=	$(addsuffix /built-in.a,$(BUILD_LIST))
 
+USER		= 	getpid
 TARGET		= 	simple_fs.cpio
+USER	   :=	$(addprefix $(DST_DIR)/,$(USER))
+TARGET	   :=	$(addprefix $(DST_DIR)/,$(TARGET))
 
 export DST_DIR CC LD AR OBJCOPY CFLAG
 
@@ -30,15 +33,16 @@ all: image
 $(BUILT_IN):
 	$(MAKE) -C $(dir $@)
 
-testelf: $(BUILT_IN)
+$(USER): $(BUILT_IN)
+	mkdir -p $(DST_DIR)
 	$(LD) -T env/link.ld -o $@ -melf64lriscv --build-id -X --whole-archive --strip-debug $(BUILT_IN)
 	$(OBJCOPY) $@ -O binary $@.bin
 
-image: testelf
+image: $(USER)
 	mkdir -p $(SYSROOT)
 	cp $< $(SYSROOT)/hello
 	echo "flag={HappyNewYear2021}" > $(SYSROOT)/flag
-	cd $(SYSROOT); find . | cpio -o -H newc > $(DST_DIR)/$(TARGET)
+	cd $(SYSROOT); find . | cpio -o -H newc > $(TARGET)
 
 clean:
-	rm -rf **/*.o **/built-in.a testelf* $(TARGET) build
+	rm -rf **/*.o **/built-in.a $(USER)* $(TARGET) build
