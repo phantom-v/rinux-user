@@ -14,7 +14,7 @@ INCLUDE		=	-I$(SRC_DIR)/include
 CFLAG		=	-march=$(ISA) -mabi=$(ABI) -mcmodel=medany \
 				-ffunction-sections -fdata-sections -nostartfiles \
 				-nostdlib -nostdinc -fno-builtin \
-				-g3 -static -lgcc $(INCLUDE)
+				-g3 -static $(INCLUDE)
 
 BUILD_LIST	= 	env lib
 BUILT_IN	=	$(addsuffix /built-in.a,$(BUILD_LIST))
