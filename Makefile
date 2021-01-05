@@ -2,6 +2,8 @@ SRC_DIR			=	$(CURDIR)
 DST_DIR			=	$(SRC_DIR)/build
 SYSROOT			=	$(DST_DIR)/sysroot
 
+include $(SRC_DIR)/app/Makefile
+
 CROSS_PREFIX	=	riscv64-unknown-elf-
 CC				=	$(CROSS_PREFIX)gcc
 LD				=	$(CROSS_PREFIX)ld
@@ -19,10 +21,8 @@ CFLAG		=	-march=$(ISA) -mabi=$(ABI) -mcmodel=medany \
 BUILD_LIST	= 	env lib
 BUILT_IN	=	$(addsuffix /built-in.a,$(BUILD_LIST))
 
-USER		= 	getpid
-TARGET		= 	simple_fs.cpio
-USER	   :=	$(addprefix $(DST_DIR)/,$(USER))
-TARGET	   :=	$(addprefix $(DST_DIR)/,$(TARGET))
+IMAGE		= 	simple_fs.cpio
+IMAGE	   :=	$(addprefix $(DST_DIR)/,$(IMAGE))
 
 export DST_DIR CC LD AR OBJCOPY CFLAG
 
@@ -30,19 +30,20 @@ export DST_DIR CC LD AR OBJCOPY CFLAG
 
 all: image
 
+$(DST_DIR) $(SYSROOT):
+	mkdir -p $@
+
 $(BUILT_IN):
 	$(MAKE) -C $(dir $@)
 
-$(USER): $(BUILT_IN)
-	mkdir -p $(DST_DIR)
-	$(LD) -T env/link.ld -o $@ -melf64lriscv --build-id -X --whole-archive --strip-debug $(BUILT_IN)
-	$(OBJCOPY) $@ -O binary $@.bin
+$(USER_TARGET): % : app/%.o $(BUILT_IN) $(DST_DIR)
+	$(LD) -T env/link.ld -o $(DST_DIR)/$@ -melf64lriscv --build-id -X $< --whole-archive --strip-debug $(BUILT_IN)
+	# $(OBJCOPY) $(DST_DIR)/$@ -O binary $(DST_DIR)/$@.bin
 
-image: $(USER)
-	mkdir -p $(SYSROOT)
-	cp $< $(SYSROOT)/hello
+image: $(USER_TARGET) $(SYSROOT)
+	cd $(DST_DIR); cp $(USER_TARGET) $(SYSROOT)
 	echo "flag={HappyNewYear2021}" > $(SYSROOT)/flag
-	cd $(SYSROOT); find . | cpio -o -H newc > $(TARGET)
+	cd $(SYSROOT); find . | cpio -o -H newc > $(IMAGE)
 
 clean:
-	rm -rf **/*.o **/built-in.a $(USER)* $(TARGET) build
+	rm -rf **/*.o **/built-in.a $(USER)* $(BUILT_IN) build
