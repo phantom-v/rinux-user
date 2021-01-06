@@ -6,7 +6,7 @@ register void* current_sp __asm__("sp");
 int main() {
   while (1) {
     printf("[User] pid: %ld, sp is %lx\n", getpid(), current_sp);
-    for (unsigned int i = 0; i < 0xFFFFFFFF; i++);
+    for (unsigned int i = 0; i < 0xFFFFFFF; i++);
   }
   
   return 0;

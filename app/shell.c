@@ -2,15 +2,6 @@
 #include "stdio.h"
 #include "string.h"
 
-int fork_(void) {
-	int pid;
-	pid = fork();
-	printf("after fork %d\n", pid);
-	if(pid < 0)
-		panic("panic fork");
-	return pid;
-}
-
 void runcmd(char* cmd) {
 	exec(cmd);
 	fprintf(2, "exec %s failed\n", cmd);
@@ -34,9 +25,13 @@ int main(void) {
         fprintf(2, "%s\n", buf);
 
 		if (strcmp(buf, "hello") == 0) {
-			if(fork_() == 0)
+			int pid = fork();
+			if(pid == 0)
 				runcmd(buf);
-			wait();
+			else if (pid > 0)
+				wait();
+			else
+				panic("panic fork");
 		}
 		else {
 			printf("Invalid command %s\n", buf);
