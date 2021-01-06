@@ -5,21 +5,15 @@
 int fork_(void) {
 	int pid;
 	pid = fork();
-	if(pid == -1)
+	printf("after fork %d\n", pid);
+	if(pid < 0)
 		panic("panic fork");
 	return pid;
 }
 
 void runcmd(char* cmd) {
-	int i;
-	for(i = 0; cmd[i] != '\0'; i++){
-		if(cmd[i] == '\n'){
-			cmd[i] = '\0';
-			break;
-		}
-	}
 	exec(cmd);
-	fprintf(2,"exec %s failed\n",cmd);
+	fprintf(2, "exec %s failed\n", cmd);
 	exit(0);
 }
 
@@ -35,21 +29,20 @@ int getcmd(char *buf, int nbuf) {
 int main(void) {
 	static char buf[100];
 	int fd;
-
-        /*
-	while((fd = open("console", O_RDWR)) >= 0){
-		if(fd >= 3){
-			close(fd);
-			break;
-		}
-	}
-        */
 	
 	while(getcmd(buf,sizeof(buf)) >= 0) {
-                fprintf(2, "%s\n", buf);
-		if(fork_() == 0)
-			runcmd(buf);
-		wait();
+        fprintf(2, "%s\n", buf);
+
+		if (strcmp(buf, "hello") == 0) {
+			if(fork_() == 0)
+				runcmd(buf);
+			wait();
+		}
+		else {
+			printf("Invalid command %s\n", buf);
+		}
+		
+
 	}
 
 	exit(0);

@@ -2,8 +2,7 @@
 #include "string.h"
 #include "syscall.h"
 
-char* gets(char *buf, int max)
-{
+char* gets(char *buf, int max) {
   int i, cc;
   char c;
 
@@ -17,17 +16,22 @@ char* gets(char *buf, int max)
     if(c == '\n' || c == '\r')
       break;
   }
-  buf[i] = '\0';
+  buf[i-1] = '\0';
   return buf;
 }
 
 void*
-memset(void *dst, int c, uint n)
-{
+memset(void *dst, int c, unsigned int n) {
   char *cdst = (char *) dst;
   int i;
   for(i = 0; i < n; i++){
     cdst[i] = c;
   }
   return dst;
+}
+
+int strcmp(const char *p, const char *q) {
+  while(*p && *p == *q)
+    p++, q++;
+  return (unsigned char)*p - (unsigned char)*q;
 }
