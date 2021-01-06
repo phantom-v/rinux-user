@@ -1,5 +1,6 @@
 USER_TARGET += 			\
 				hello 	\
+				shell	\
 				demo
 
 %.o:%.c
