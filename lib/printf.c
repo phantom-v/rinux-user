@@ -9,7 +9,7 @@ static inline int putchar(int c) {
     return 0;
 }
 
-static int vprintfmt(int fd_, int(*putch)(int), const char *fmt, va_list vl) {
+static int vprintfmt(int fd, int(*putch)(int), const char *fmt, va_list vl) {
     int in_format = 0, longarg = 0;
     size_t pos = 0;
 
@@ -102,7 +102,7 @@ static int vprintfmt(int fd_, int(*putch)(int), const char *fmt, va_list vl) {
         }
     }
 
-    long syscall_ret, fd = fd_;
+    long syscall_ret;
     buffer[tail++] = '\0';
     asm volatile ("li a7, %1\n"
                   "mv a0, %2\n"
@@ -136,4 +136,9 @@ int fprintf(int fd, const char* fmt, ...)
 	res = vprintfmt(fd, putchar, fmt, vl);
 	va_end(vl);
 	return res;
+}
+
+void panic(char* s) {
+	fprintf(2,"%s\n",s);
+	exit(1);
 }
