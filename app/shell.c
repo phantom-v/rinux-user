@@ -26,10 +26,15 @@ int main(void) {
 
 		if (strcmp(buf, "hello") == 0) {
 			int pid = fork();
+
+			printf("Get pid %d\n", pid);
+
 			if(pid == 0)
 				runcmd(buf);
-			else if (pid > 0)
+			else if (pid > 0) {
 				wait();
+			}
+				
 			else
 				panic("panic fork");
 		}
